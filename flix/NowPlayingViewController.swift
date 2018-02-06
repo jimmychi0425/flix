@@ -8,13 +8,16 @@
 
 import UIKit
 import AlamofireImage
+import PKHUD
 
 class NowPlayingViewController: UIViewController, UITableViewDataSource {
 
     var movies: [[String : Any]] = []
     var refreshControl: UIRefreshControl!
     @IBOutlet weak var tableView: UITableView!
-  
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    var alertController = UIAlertController(title: "Title", message: "Message", preferredStyle: .alert)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         refreshControl = UIRefreshControl()
@@ -30,6 +33,8 @@ class NowPlayingViewController: UIViewController, UITableViewDataSource {
     }
     
     func fetchMovies() {
+        //activityIndicator.startAnimating()
+        HUD.show(.progress, onView: tableView)
         let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
@@ -43,6 +48,8 @@ class NowPlayingViewController: UIViewController, UITableViewDataSource {
                 self.movies = movies
                 self.tableView.reloadData()
                 self.refreshControl.endRefreshing()
+                HUD.flash(.success, delay: 1.0)
+                //self.activityIndicator.stopAnimating()
             }
         }
         task.resume()
@@ -59,10 +66,13 @@ class NowPlayingViewController: UIViewController, UITableViewDataSource {
         let overview = movie["overview"] as! String
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
-        let posterPathString = movie["poster_path"] as! String
-        let baseURLString = "https://image.tmdb.org/t/p/w500"
-        let posterURL = URL(string: baseURLString + posterPathString)!
-        cell.posterImageView.af_setImage(withURL: posterURL)
+        if let posterPathString = movie["poster_path"] as? String {
+            let baseURLString = "https://image.tmdb.org/t/p/w500"
+            let posterURL = URL(string: baseURLString + posterPathString)!
+            cell.posterImageView.af_setImage(withURL: posterURL)
+        } else {
+            cell.posterImageView.image = nil
+        }
         return cell
     }
     
@@ -70,8 +80,5 @@ class NowPlayingViewController: UIViewController, UITableViewDataSource {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-
-
 
 }
