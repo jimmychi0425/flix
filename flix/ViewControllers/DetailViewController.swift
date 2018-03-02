@@ -8,13 +8,7 @@
 
 import UIKit
 
-enum MovieKeys {
-    static let title = "title"
-    static let realeaseDate = "release_date"
-    static let overview = "overview"
-    static let backDropPath = "backdrop_path"
-    static let posterPath = "poster_path"
-}
+
 class DetailViewController: UIViewController {
 
     @IBOutlet weak var backDropImageView: UIImageView!
@@ -22,21 +16,24 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var realeaseDateLabel: UILabel!
     @IBOutlet weak var overviewLabel: UILabel!
-    var movie: [String : Any]?
+    var movie: Movie?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if let movie = movie {
-            titleLabel.text = movie[MovieKeys.title] as? String
-            realeaseDateLabel.text = movie[MovieKeys.realeaseDate] as? String
-            overviewLabel.text = movie[MovieKeys.overview] as? String
-            let backDropPathString = movie[MovieKeys.backDropPath] as! String
-            let posterPathString = movie[MovieKeys.posterPath] as! String
-            let baseURLString = "https://image.tmdb.org/t/p/w500"
-            let backDropURL = URL(string: baseURLString + backDropPathString)!
-            backDropImageView.af_setImage(withURL: backDropURL)
-            let posterURL = URL(string: baseURLString + posterPathString)!
-            posterImageView.af_setImage(withURL: posterURL)
+            titleLabel.text = movie.title
+            realeaseDateLabel.text = movie.releaseDate
+            overviewLabel.text = movie.overview
+            if let backDropURL = movie.backDropURL {
+                backDropImageView.af_setImage(withURL: backDropURL)
+            } else {
+                backDropImageView.image = nil
+            }
+            if let posterURL = movie.posterUrl {
+                posterImageView.af_setImage(withURL: posterURL)
+            } else {
+                posterImageView.image = nil
+            }
         }
         // Do any additional setup after loading the view.
     }
